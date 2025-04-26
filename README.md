@@ -22,6 +22,11 @@ cat *.pub > authorized_keys
 
 ## How to set up SSH and automatically update authorized keys with crontab
 
+> [!Requirements:]
+> `wget` 
+> `crontab` 
+---
+
 ### Install and configure OpenSSH server
 
 Update your package list and install the OpenSSH server:
@@ -63,8 +68,12 @@ systemctl restart ssh
 
 To keep your SSH keys up to date, add this cron job in the home directory of the user you want to allow SSH access for:
 ```bash
-( crontab -l 2>/dev/null; \
-  echo "*/5 * * * * mkdir -p $(pwd)/.ssh && curl -fsSL https://raw.githubusercontent.com/nikon-63/ssh-public-keys/main/authorized_keys > $(pwd)/.ssh/authorized_keys" \
-) | crontab -
+echo '#!/usr/bin/env bash' > regen_ssh_keys.sh && \
+echo 'DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"' >> regen_ssh_keys.sh && \
+echo 'mkdir -p "$DIR/.ssh"' >> regen_ssh_keys.sh && \
+echo 'wget -qO "$DIR/.ssh/authorized_keys" https://raw.githubusercontent.com/nikon-63/ssh-public-keys/main/authorized_keys' >> regen_ssh_keys.sh && \
+chmod +x regen_ssh_keys.sh && \
+( crontab -l 2>/dev/null; echo "*/5 * * * * $(pwd)/regen_ssh_keys.sh" ) | crontab - && \
+crontab -l
 ```
 This will ensure your `.ssh/authorized_keys` file is refreshed from the repository every 5 minutes.
