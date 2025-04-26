@@ -20,9 +20,11 @@ After adding a new `.pub` file:
 cat *.pub > authorized_keys
 ```
 
-## How to install SSH and crontab to auto install ssh keys (crontab)
+## How to set up SSH and automatically update authorized keys with crontab
 
-### Install and config openssh-server
+### Install and configure OpenSSH server
+
+Update your package list and install the OpenSSH server:
 ```bash
 sudo apt update
 
@@ -32,30 +34,37 @@ sudo systemctl enable ssh
 sudo systemctl start ssh
 ```
 
-#### One liner with sudo 
+#### All-in-one command with sudo
 ```bash
 sudo apt update && sudo apt install -y openssh-server && sudo systemctl enable ssh && sudo systemctl start ssh
 ```
-#### One liner without sudo
+#### All-in-one command without sudo
 ```bash
 apt update && apt install -y openssh-server && systemctl enable ssh && systemctl start ssh
 ```
 
-### Enabling PubkeyAuthentication
+### Enable public key authentication
+
+Edit your SSH server configuration file:
+```
 nano /etc/ssh/sshd_config
+```
+Make sure the following line is present:
 ```bash
 PubkeyAuthentication yes
 ```
 
-Then restart SSH 
+Restart the SSH service to apply changes:
 ```bash
 systemctl restart ssh
 ```
 
-### Autodownload SSH key file every 5 minits
-run this in the home dir of your user you want to login in as with SSH 
+### Automatically download the latest authorized_keys every 5 minutes
+
+To keep your SSH keys up to date, add this cron job in the home directory of the user you want to allow SSH access for:
 ```bash
 ( crontab -l 2>/dev/null; \
   echo "*/5 * * * * mkdir -p $(pwd)/.ssh && curl -fsSL https://raw.githubusercontent.com/nikon-63/ssh-public-keys/main/authorized_keys > $(pwd)/.ssh/authorized_keys" \
 ) | crontab -
 ```
+This will ensure your `.ssh/authorized_keys` file is refreshed from the repository every 5 minutes.
