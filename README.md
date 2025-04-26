@@ -21,11 +21,8 @@ cat *.pub > authorized_keys
 ```
 
 ## How to set up SSH and automatically update authorized keys with crontab
-
-> [!Requirements:]
-> `wget` 
-> `crontab` 
----
+> [!NOTE]
+> `wget` and `crontab` are required
 
 ### Install and configure OpenSSH server
 
